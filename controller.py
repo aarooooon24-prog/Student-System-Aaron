@@ -78,12 +78,11 @@ def update_student():
         if age.isdigit():
             student["age"] = int(age)
 
-        model.save_students()   
+        model.save_students()
 
         view.show("Updated!")
     else:
         view.show("Not found")
-   
 
 def delete_student():
     view.show("\n--- Delete ---")
@@ -92,7 +91,7 @@ def delete_student():
     student = model.find_student(student_id)
 
     if student:
-        model.delete_student_data(student)
+        model.delete_student_data(student["id"])
         view.show("Deleted!")
     else:
         view.show("Not found")

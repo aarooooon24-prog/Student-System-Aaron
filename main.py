@@ -1,7 +1,5 @@
 import model
 import controller
 
-print("STARTING PROGRAM")
-
-model.load_students()
+model.init_db()   # 👈 creates table if not exists
 controller.run()
