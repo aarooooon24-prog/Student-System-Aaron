@@ -1,100 +1,140 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 import model
 
 
-# ---------- MAIN WINDOW ----------
-root = tk.Tk()
-root.title("Student Management System")
-root.geometry("400x400")
+# ---------- COLORS ----------
+BG = "#1e1e1e"
+FG = "#ffffff"
+SIDEBAR = "#2b2b2b"
+BTN = "#3a3a3a"
+ENTRY = "#2b2b2b"
 
 
-# ---------- INPUT FIELDS ----------
-tk.Label(root, text="Student ID").pack()
-id_entry = tk.Entry(root)
-id_entry.pack()
+# ---------- APP ----------
+def start_app():
+    global root, id_entry, name_entry, age_entry, table, content_frame
 
-tk.Label(root, text="Name").pack()
-name_entry = tk.Entry(root)
-name_entry.pack()
-
-tk.Label(root, text="Age").pack()
-age_entry = tk.Entry(root)
-age_entry.pack()
+    root = tk.Tk()
+    root.title("Student Dashboard System")
+    root.geometry("900x500")
+    root.configure(bg=BG)
 
 
-# ---------- FUNCTIONS ----------
-
-def add_student():
-    student = {
-        "id": id_entry.get(),
-        "name": name_entry.get(),
-        "age": int(age_entry.get())
-    }
-
-    if model.find_student(student["id"]):
-        messagebox.showerror("Error", "ID already exists!")
-        return
-
-    model.add_student_data(student)
-    messagebox.showinfo("Success", "Student Added!")
+    # ======================================================
+    # SIDEBAR
+    # ======================================================
+    sidebar = tk.Frame(root, bg=SIDEBAR, width=200)
+    sidebar.pack(side="left", fill="y")
 
 
-def view_students():
-    students = model.get_students()
+    tk.Label(sidebar, text="MENU", bg=SIDEBAR, fg=FG, font=("Arial", 14, "bold")).pack(pady=20)
 
-    text = ""
-    for s in students:
-        text += f"{s['id']} | {s['name']} | {s['age']}\n"
-
-    messagebox.showinfo("Students List", text if text else "No students found")
+    tk.Button(sidebar, text="Add Student", bg=BTN, fg=FG, command=lambda: show_frame("add")).pack(fill="x", pady=5)
+    tk.Button(sidebar, text="View Students", bg=BTN, fg=FG, command=lambda: show_frame("view")).pack(fill="x", pady=5)
+    tk.Button(sidebar, text="Search", bg=BTN, fg=FG, command=lambda: show_frame("search")).pack(fill="x", pady=5)
 
 
-def search_student():
-    student = model.find_student(id_entry.get())
-
-    if student:
-        name_entry.delete(0, tk.END)
-        age_entry.delete(0, tk.END)
-
-        name_entry.insert(0, student["name"])
-        age_entry.insert(0, student["age"])
-    else:
-        messagebox.showerror("Not Found", "Student not found")
+    # ======================================================
+    # MAIN CONTENT AREA
+    # ======================================================
+    content_frame = tk.Frame(root, bg=BG)
+    content_frame.pack(side="right", expand=True, fill="both")
 
 
-def update_student():
-    student = model.find_student(id_entry.get())
-
-    if student:
-        student["name"] = name_entry.get()
-        student["age"] = int(age_entry.get())
-
-        model.update_student_data(student)
-
-        messagebox.showinfo("Updated", "Student updated!")
-    else:
-        messagebox.showerror("Error", "Student not found")
+    # ======================================================
+    # FRAMES
+    # ======================================================
+    add_frame = tk.Frame(content_frame, bg=BG)
+    view_frame = tk.Frame(content_frame, bg=BG)
+    search_frame = tk.Frame(content_frame, bg=BG)
 
 
-def delete_student():
-    student_id = id_entry.get()
+    # ================= ADD STUDENT =================
+    tk.Label(add_frame, text="ID", bg=BG, fg=FG).grid(row=0, column=0)
+    id_entry = tk.Entry(add_frame, bg=ENTRY, fg=FG, insertbackground="white")
+    id_entry.grid(row=0, column=1)
 
-    if model.find_student(student_id):
-        model.delete_student_data(student_id)
-        messagebox.showinfo("Deleted", "Student deleted!")
-    else:
-        messagebox.showerror("Error", "Student not found")
+    tk.Label(add_frame, text="Name", bg=BG, fg=FG).grid(row=1, column=0)
+    name_entry = tk.Entry(add_frame, bg=ENTRY, fg=FG, insertbackground="white")
+    name_entry.grid(row=1, column=1)
 
-
-# ---------- BUTTONS ----------
-
-tk.Button(root, text="Add Student", command=add_student).pack(pady=5)
-tk.Button(root, text="View Students", command=view_students).pack(pady=5)
-tk.Button(root, text="Search Student", command=search_student).pack(pady=5)
-tk.Button(root, text="Update Student", command=update_student).pack(pady=5)
-tk.Button(root, text="Delete Student", command=delete_student).pack(pady=5)
+    tk.Label(add_frame, text="Age", bg=BG, fg=FG).grid(row=2, column=0)
+    age_entry = tk.Entry(add_frame, bg=ENTRY, fg=FG, insertbackground="white")
+    age_entry.grid(row=2, column=1)
 
 
-# ---------- START ----------
-root.mainloop()
+    def add_student():
+        student = {
+            "id": id_entry.get(),
+            "name": name_entry.get(),
+            "age": int(age_entry.get())
+        }
+
+        model.add_student_data(student)
+        refresh_table()
+        messagebox.showinfo("Success", "Student Added")
+
+
+    tk.Button(add_frame, text="Add Student", bg=BTN, fg=FG, command=add_student).grid(row=3, column=1, pady=10)
+
+
+    # ================= VIEW STUDENTS =================
+    table = ttk.Treeview(view_frame, columns=("ID", "Name", "Age"), show="headings")
+    table.heading("ID", text="ID")
+    table.heading("Name", text="Name")
+    table.heading("Age", text="Age")
+    table.pack(expand=True, fill="both")
+
+
+    def refresh_table():
+        for row in table.get_children():
+            table.delete(row)
+
+        for s in model.get_students():
+            table.insert("", "end", values=(s["id"], s["name"], s["age"]))
+
+
+    # ================= SEARCH =================
+    tk.Label(search_frame, text="Search Name or ID", bg=BG, fg=FG).pack()
+
+    search_entry = tk.Entry(search_frame, bg=ENTRY, fg=FG, insertbackground="white")
+    search_entry.pack()
+
+    result = tk.Label(search_frame, text="", bg=BG, fg=FG)
+    result.pack()
+
+    def search():
+        query = search_entry.get().lower()
+
+        matches = []
+        for s in model.get_students():
+            if query in s["id"].lower() or query in s["name"].lower():
+                matches.append(f"{s['id']} | {s['name']} | {s['age']}")
+
+        result.config(text="\n".join(matches) if matches else "No results")
+
+
+    tk.Button(search_frame, text="Search", bg=BTN, fg=FG, command=search).pack()
+
+
+    # ======================================================
+    # FRAME SWITCHER
+    # ======================================================
+    def show_frame(name):
+        for f in (add_frame, view_frame, search_frame):
+            f.pack_forget()
+
+        if name == "add":
+            add_frame.pack(fill="both", expand=True)
+        elif name == "view":
+            view_frame.pack(fill="both", expand=True)
+            refresh_table()
+        elif name == "search":
+            search_frame.pack(fill="both", expand=True)
+
+
+    # default view
+    show_frame("view")
+
+    root.mainloop()

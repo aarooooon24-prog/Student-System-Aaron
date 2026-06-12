@@ -1,4 +1,5 @@
 import model
-import gui
+import login
 
 model.init_db()
+login.login_screen()
