@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import json
 
 import os
@@ -33,6 +34,14 @@ def add_student_data(student):
 def delete_student_data(student):
     students.remove(student)
     save_students()
+=======
+students = []
+
+
+def add_student_data(student):
+    students.append(student)
+
+>>>>>>> 173670d2fdef9fee75fdd776c86f409755b08e78
 
 def get_students():
     return students
@@ -44,3 +53,9 @@ def find_student(student_id):
             return student
     return None
 
+<<<<<<< HEAD
+=======
+
+def delete_student_data(student):
+    students.remove(student)
+>>>>>>> 173670d2fdef9fee75fdd776c86f409755b08e78
