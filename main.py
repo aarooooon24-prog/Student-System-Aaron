@@ -1,10 +1,7 @@
-<<<<<<< HEAD
 import model
 import controller
 
-model.load_students()
-=======
-import controller
+print("STARTING PROGRAM")
 
->>>>>>> 173670d2fdef9fee75fdd776c86f409755b08e78
+model.load_students()
 controller.run()
