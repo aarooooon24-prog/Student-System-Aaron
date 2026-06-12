@@ -1,5 +1,4 @@
 import model
-import controller
+import gui
 
-model.init_db()   # 👈 creates table if not exists
-controller.run()
+model.init_db()
